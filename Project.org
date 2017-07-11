@@ -1,0 +1,4 @@
+
+* Features
+
+  - jump to function definition when click on cell

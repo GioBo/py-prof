@@ -67,42 +67,135 @@ cumtime) are converted to numbers."
     )
   )
 
-
 (defun py-prof-create-table (py-prof--table)
-  "Build the ctable structure containing the cProfile data and render them.
-Data - passed in the  PY-PROF--TABLE -  can be sorted clicking on the columns' headers."
-  ;;(interactive)
-  (let* ((column-model ; column model
-	  (list (make-ctbl:cmodel
-		 :title "ncalls" :min-width 10 :align 'right)
-		(make-ctbl:cmodel
-		 :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
-		 :min-width 8 :align 'right)
-		(make-ctbl:cmodel
-		 :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-		 :min-width 8 :align 'right)
-		(make-ctbl:cmodel
-		 :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
-		 :min-width 8 :align 'right)
-		(make-ctbl:cmodel
-		 :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-		 :min-width 8 :align 'right)
-		(make-ctbl:cmodel
-		 :title "filename:lineno(function)" :align 'left
-		 :min-width 30 :align 'right)
-		))
-	 (data py-prof--table)
-	 (model ; data model
-          (make-ctbl:model
-           :column-model column-model :data data))
-	 (component ; ctable component
+  "docstring"
+  (interactive)
+
+  (lexical-let*
+      ((column-model ; column model
+	(list (make-ctbl:cmodel
+	       :title "ncalls" :min-width 10 :align 'right)
+	      (make-ctbl:cmodel
+	       :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
+	       :min-width 8 :align 'right)
+	      (make-ctbl:cmodel
+	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+	       :min-width 8 :align 'right)
+	      (make-ctbl:cmodel
+	       :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
+	       :min-width 8 :align 'right)
+	      (make-ctbl:cmodel
+	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+	       :min-width 8 :align 'right)
+	      (make-ctbl:cmodel
+	       :title "filename:lineno(function)" :align 'left
+	       :min-width 30 :align 'right)
+	      ))
+
+       (data py-prof--table)
+
+       (model ; data model
+	(make-ctbl:model
+	 :column-model column-model :data data))
+       component)
+    
+    (setq component ; building a ctable component
 	  (ctbl:create-table-component-buffer
-	   :model model)))
-    (pop-to-buffer (ctbl:cp-get-buffer component)))
+	   :model model))
+    
+    ;; Click event handler
+    (ctbl:cp-add-click-hook
+     component (lambda () 
+		 (let ((row  (py-prof-get-file (ctbl:cp-get-selected-data-row component))))
+		   ;;(message "CTable : Click Hook []")
+		   (if row
+		       (progn 
+			 (message (plist-get row :file))
+			 (find-file (plist-get row :file))
+			 (goto-line (plist-get row :line))
+ 			 )
+		     )
+		   (message "Not a file link")
+		   )
+		 )
+     ) ; update table
 
+    ;; Selection change event handler
+    (ctbl:cp-add-selection-change-hook
+     component (lambda () (message "CTable : Select Hook %S"
+				   (ctbl:cp-get-selected component))))
 
+    ;; Update event handler
+    (ctbl:cp-add-update-hook
+     component (lambda () (message "CTable : Update Hook")))
+    
+    (pop-to-buffer (ctbl:cp-get-buffer component)))  ; <- C-x C-e here to evaluate
   )
 
+
+
+
+;; (defun py-prof-create-table (py-prof--table)
+;;   "Build the ctable structure containing the cProfile data and render them.
+;; Data - passed in the  PY-PROF--TABLE -  can be sorted clicking on the columns' headers."
+;;   ;;(interactive)
+;;   (lexical-let*
+;;       ((column-model ; column model
+;; 	(list (make-ctbl:cmodel
+;; 	       :title "ncalls" :min-width 10 :align 'right)
+;; 	      (make-ctbl:cmodel
+;; 	       :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
+;; 	       :min-width 8 :align 'right)
+;; 	      (make-ctbl:cmodel
+;; 	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+;; 	       :min-width 8 :align 'right)
+;; 	      (make-ctbl:cmodel
+;; 	       :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
+;; 	       :min-width 8 :align 'right)
+;; 	      (make-ctbl:cmodel
+;; 	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+;; 	       :min-width 8 :align 'right)
+;; 	      (make-ctbl:cmodel
+;; 	       :title "filename:lineno(function)" :align 'left
+;; 	       :min-width 30 :align 'right)
+;; 	      ))
+;;        (data py-prof--table)
+;;        (model ; data model
+;; 	(make-ctbl:model
+;; 	 :column-model column-model :data data)
+;; 	component)
+	
+
+;;        (setq component ; ctable component
+;; 	     (ctbl:create-table-component-buffer
+;; 	      :model model))
+
+;;        (ctbl:cp-add-click-hook
+;; 	component (lambda () 
+;; 		    (let ((row (ctbl:cp-get-selected-data-row component))
+;; 			  (dat-py (py-prof-get-file row))b
+;; 			  )
+;; 		      (if dat-py
+;; 			  (progn
+;; 			    (find-file  (plist-get dat-py :file))
+;; 			    (goto-line  (plist-get dat-py :line))
+;; 			    )
+;; 			)
+;; 		      )
+;; 		    )
+;; 	)
+       
+;;        )
+;;     (pop-to-buffer (ctbl:cp-get-buffer component)))
+
+
+;;   )
+
+
+;; go=sys.modules.keys()
+;; print os.path.abspath(cf.__file__)
+;; os.getcwd()
+;; sys.path
 
 (defun py-prof-execute-command-cProfile ()
   "Run cProfile on a command and get the results.
@@ -141,6 +234,25 @@ last temp file."
     )
   )
 
+(defun py-prof-get-file (CONTENT)
+  "docstring"
+  (interactive)
+  (let*
+      ((py-prof-cell-file (nth 5 CONTENT))
+       )
+    (if (s-match "^[\{ \<]" py-prof-cell-file)
+	nil
+      (list :file (nth 0 (split-string py-prof-cell-file ":"))
+	    :line (string-to-number 
+		   (replace-regexp-in-string ".*:\\([0-9]+\\).*" "\\1"
+					     py-prof-cell-file)
+		   )
+	    )
+      )
+    )
+  )
+
+
 
 (defun py-prof ()
   "Create a table of cProfile output using the ctable package."
@@ -160,6 +272,16 @@ last temp file."
   )
 
 
+(define-minor-mode py-prof-mode
+  "Observe cProfile output."
+  :lighter "py-prof"
+  :keymap (let ((map (make-sparse-keymap)))
+	    (define-key map (kbd "C-c r") 'py-prof)
+;;	    (define-key map (kbd "C-c s") 'ess-view-str-viewer)
+	    map))
+
+
+(add-hook 'python-mode-hook 'py-prof-mode)
 
 (provide 'py-prof)
 

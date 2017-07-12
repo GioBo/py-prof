@@ -68,7 +68,8 @@ cumtime) are converted to numbers."
   )
 
 (defun py-prof-create-table (py-prof--table)
-  "docstring"
+  "Create the ctable and render it.
+PY-PROF--TABLE contains the data provided by the profiler."
   (interactive)
 
   (lexical-let*
@@ -105,11 +106,11 @@ cumtime) are converted to numbers."
     
     ;; Click event handler
     (ctbl:cp-add-click-hook
-     component (lambda () 
+     component (lambda ()
 		 (let ((row  (py-prof-get-file (ctbl:cp-get-selected-data-row component))))
 		   ;;(message "CTable : Click Hook []")
 		   (if row
-		       (progn 
+		       (progn
 			 (message (plist-get row :file))
 			 (find-file (plist-get row :file))
 			 (goto-line (plist-get row :line))
@@ -139,10 +140,12 @@ cumtime) are converted to numbers."
 ;; sys.path
 
 (defun py-prof-execute-command-cProfile (COMMAND)
-  "Run cProfile on a command and get the results.
-Ask for a command for which cProfile should be run, then run it,
-save the output to a temp file, reload it with pstats and save the
-output to another human-readable file which; return the name of this
+  "Run cProfile and get the results.
+COMMAND is a switcher: if equals 'run_function', then the function
+asks for a command for which cProfile should be run, otherwise the name
+of the file to profile is asked; then the profiler is run,
+the output saved to a temp file, reload with pstats an the
+output is saved to another human-readable file which; return the name of this
 last temp file."
   ;;(interactive)
   (let*
@@ -181,7 +184,10 @@ last temp file."
   )
 
 (defun py-prof-get-file (CONTENT)
-  "docstring"
+"Get the file containing the profiled function.
+When the user clicks on a row of the table, the function attempts to
+open the file containing the function analyised whithin that row.
+CONTENT is the content of the clicked row of the ctable."
   (interactive)
   (let*
       ((py-prof-cell-file (nth 5 CONTENT))
@@ -189,7 +195,7 @@ last temp file."
     (if (s-match "^[\{ \<]" py-prof-cell-file)
 	nil
       (list :file (nth 0 (split-string py-prof-cell-file ":"))
-	    :line (string-to-number 
+	    :line (string-to-number
 		   (replace-regexp-in-string ".*:\\([0-9]+\\).*" "\\1"
 					     py-prof-cell-file)
 		   )
@@ -222,7 +228,7 @@ last temp file."
   "docstring"
   (interactive)
   (py-prof-ex "run_function")
-  ) 
+  )
 
 (defun py-prof-file()
   "docstring"

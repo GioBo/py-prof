@@ -35,7 +35,7 @@ The table shown has the following properties:
 ## Installing
 
 
-Dowload `py-prof.el` somewhere on your machine then add that directory to Emacs load-path:
+Download `py-prof.el` somewhere on your machine then add that directory to Emacs load-path:
 
 
 	(add-to-list 'load-path "~/path/to/py-prof/")

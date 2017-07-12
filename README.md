@@ -5,7 +5,7 @@
 Easily observe python cProfile output in Emacs via ctable.
 
 
-[Image of table](table.png)
+![Alt text](table.png "Image of ctable")
 
 ## Why use py-prof?
 

@@ -197,7 +197,7 @@ cumtime) are converted to numbers."
 ;; os.getcwd()
 ;; sys.path
 
-(defun py-prof-execute-command-cProfile ()
+(defun py-prof-execute-command-cProfile (COMMAND)
   "Run cProfile on a command and get the results.
 Ask for a command for which cProfile should be run, then run it,
 save the output to a temp file, reload it with pstats and save the
@@ -209,12 +209,17 @@ last temp file."
        (temp-file (make-temp-file nil nil ".prof"))
        (temp-file-csv (make-temp-file nil nil ".csv"))
 
-       (comando (read-from-minibuffer "Command to execute : " ""))
-       (comando (s-replace "\"" "'" comando))
+       (comando
+	(if (equal COMMAND "r")
+	    (s-replace  "\"" "'"  (read-from-minibuffer "Command to execute : " ""))
+	  (read-file-name "Enter name of the file to profile:")))
        (comandi (list
 		 "import cProfile"
 		 "import pstats"
-		 (format "cProfile.run(\"%s\", filename='%s')" comando temp-file)
+		 (if (equal COMMAND "r")
+		     (format "cProfile.run(\"%s\", filename='%s')" comando temp-file)
+		   (format "cProfile.run(open('%s', 'rb'), filename='%s')" comando temp-file)
+		   )
 		 (format "f = open('%s','w')" temp-file-csv)
 		 (format "ps = pstats.Stats('%s', stream=f)" temp-file)
 		 "ps.print_stats()"
@@ -259,17 +264,19 @@ last temp file."
   (interactive)
   (let*
       (
-       (temp-file-csv (py-prof-execute-command-cProfile))
+       (codes (key-description (this-command-keys-vector)))
+       (called (make-string 1 (aref codes (1- (length codes)))))
+       (temp-file-csv (py-prof-execute-command-cProfile called))
        (temp-list (s-split "\n" (f-read temp-file-csv) t))
        ;; find the beginning of the cProfile table
        (temp-header (-find-index (lambda(x) (string-match-p "ncalls\\s-+tottime" x)) temp-list))
-       ;; filter out the first rows
-       (data-table (-drop (+ 1 temp-header) temp-list))
-       (data-filtered (mapcar (lambda(x) (py-prof-split-lines-prun x)) data-table))
+	;; filter out the first rows
+	(data-table (-drop (+ 1 temp-header) temp-list))
+	(data-filtered (mapcar (lambda(x) (py-prof-split-lines-prun x)) data-table))
+	)
+       (py-prof-create-table data-filtered)
        )
-    (py-prof-create-table data-filtered)
     )
-  )
 
 
 (define-minor-mode py-prof-mode
@@ -277,7 +284,7 @@ last temp file."
   :lighter "py-prof"
   :keymap (let ((map (make-sparse-keymap)))
 	    (define-key map (kbd "C-c r") 'py-prof)
-;;	    (define-key map (kbd "C-c s") 'ess-view-str-viewer)
+	    (define-key map (kbd "C-c f") 'py-prof)
 	    map))
 
 

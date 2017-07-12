@@ -7,11 +7,13 @@ Easily observe python cProfile output in Emacs via ctable.
 
 ## Why use py-prof?
 
-  *py-prof* was created to make the use of cProfile easier (and more interactive) for Emacs users.
+  The minor mode *py-prof* was created to make the use of cProfile easier (and more interactive) for Emacs users.
 	
 
 ## Usage
 
+
+  *py-prof* provides just 
 
   Just use
   

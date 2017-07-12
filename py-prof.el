@@ -1,9 +1,12 @@
 ;;; py-prof.el --- Easily observe python cProfile output
 
-;; Copyright (C) 2017 gionata
+;; Copyright (C) 2017 Gionata Bocci
 
-;; Author: gionata <gionata@gionata-dell>
+;; Author: G. Bocci <boccigionata@gmail.com>
 ;; Version: 0.1
+;; Package-Requires: ((dash) (s) (ctable))
+;; Keywords: python, cProfile, profiling
+;; URL: https://github.com/GioBo/py-prof/
 
 ;; This file is not part of GNU Emacs.
 
@@ -31,6 +34,8 @@
 ;;; columns.
 
 ;; Easily observe python cProfile output
+
+;;; Change Log:
 
 ;;; Code:
 

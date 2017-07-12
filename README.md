@@ -5,6 +5,8 @@
 Easily observe python cProfile output in Emacs via ctable.
 
 
+[Image of table](table.png)
+
 ## Why use py-prof?
 
   The minor mode *py-prof* was created to make the use of cProfile easier (and more interactive) for Emacs users.
@@ -26,7 +28,7 @@ The table shown has the following properties:
   - hit `RET` on a row and `py-prof` will try to open the file the line is referring to (this feature is still *experimental*, it is not guaranteed to work always). 
 
 
-*NB*: if there's not an inferior `python` process going on, instead of the table you'll get a message warning you.
+*NB*: if there's not an inferior `python` process going on, instead of the table you'll get a warning message.
     
 
 

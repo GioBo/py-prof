@@ -18,3 +18,4 @@ dist
 .ecukes-failing-scenarios
 *.py
 *.html
+.projectile

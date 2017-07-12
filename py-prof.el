@@ -133,65 +133,6 @@ cumtime) are converted to numbers."
   )
 
 
-
-
-;; (defun py-prof-create-table (py-prof--table)
-;;   "Build the ctable structure containing the cProfile data and render them.
-;; Data - passed in the  PY-PROF--TABLE -  can be sorted clicking on the columns' headers."
-;;   ;;(interactive)
-;;   (lexical-let*
-;;       ((column-model ; column model
-;; 	(list (make-ctbl:cmodel
-;; 	       :title "ncalls" :min-width 10 :align 'right)
-;; 	      (make-ctbl:cmodel
-;; 	       :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
-;; 	       :min-width 8 :align 'right)
-;; 	      (make-ctbl:cmodel
-;; 	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-;; 	       :min-width 8 :align 'right)
-;; 	      (make-ctbl:cmodel
-;; 	       :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
-;; 	       :min-width 8 :align 'right)
-;; 	      (make-ctbl:cmodel
-;; 	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-;; 	       :min-width 8 :align 'right)
-;; 	      (make-ctbl:cmodel
-;; 	       :title "filename:lineno(function)" :align 'left
-;; 	       :min-width 30 :align 'right)
-;; 	      ))
-;;        (data py-prof--table)
-;;        (model ; data model
-;; 	(make-ctbl:model
-;; 	 :column-model column-model :data data)
-;; 	component)
-	
-
-;;        (setq component ; ctable component
-;; 	     (ctbl:create-table-component-buffer
-;; 	      :model model))
-
-;;        (ctbl:cp-add-click-hook
-;; 	component (lambda () 
-;; 		    (let ((row (ctbl:cp-get-selected-data-row component))
-;; 			  (dat-py (py-prof-get-file row))b
-;; 			  )
-;; 		      (if dat-py
-;; 			  (progn
-;; 			    (find-file  (plist-get dat-py :file))
-;; 			    (goto-line  (plist-get dat-py :line))
-;; 			    )
-;; 			)
-;; 		      )
-;; 		    )
-;; 	)
-       
-;;        )
-;;     (pop-to-buffer (ctbl:cp-get-buffer component)))
-
-
-;;   )
-
-
 ;; go=sys.modules.keys()
 ;; print os.path.abspath(cf.__file__)
 ;; os.getcwd()
@@ -210,13 +151,13 @@ last temp file."
        (temp-file-csv (make-temp-file nil nil ".csv"))
 
        (comando
-	(if (equal COMMAND "r")
+	(if (equal COMMAND "run_function")
 	    (s-replace  "\"" "'"  (read-from-minibuffer "Command to execute : " ""))
 	  (read-file-name "Enter name of the file to profile:")))
        (comandi (list
 		 "import cProfile"
 		 "import pstats"
-		 (if (equal COMMAND "r")
+		 (if (equal COMMAND "run_function")
 		     (format "cProfile.run(\"%s\", filename='%s')" comando temp-file)
 		   (format "cProfile.run(open('%s', 'rb'), filename='%s')" comando temp-file)
 		   )
@@ -259,14 +200,12 @@ last temp file."
 
 
 
-(defun py-prof ()
+(defun py-prof-ex(CALLED)
   "Create a table of cProfile output using the ctable package."
   (interactive)
   (let*
       (
-       (codes (key-description (this-command-keys-vector)))
-       (called (make-string 1 (aref codes (1- (length codes)))))
-       (temp-file-csv (py-prof-execute-command-cProfile called))
+       (temp-file-csv (py-prof-execute-command-cProfile CALLED))
        (temp-list (s-split "\n" (f-read temp-file-csv) t))
        ;; find the beginning of the cProfile table
        (temp-header (-find-index (lambda(x) (string-match-p "ncalls\\s-+tottime" x)) temp-list))
@@ -279,16 +218,27 @@ last temp file."
     )
 
 
+(defun py-prof-run()
+  "docstring"
+  (interactive)
+  (py-prof-ex "run_function")
+  ) 
+
+(defun py-prof-file()
+  "docstring"
+  (interactive)
+  (py-prof-ex "run_script")
+  )
+
+
 (define-minor-mode py-prof-mode
   "Observe cProfile output."
   :lighter "py-prof"
   :keymap (let ((map (make-sparse-keymap)))
-	    (define-key map (kbd "C-c r") 'py-prof)
-	    (define-key map (kbd "C-c f") 'py-prof)
+	    (define-key map (kbd "C-c r") 'py-prof-run)
+	    (define-key map (kbd "C-c f") 'py-prof-file)
 	    map))
 
-
-(add-hook 'python-mode-hook 'py-prof-mode)
 
 (provide 'py-prof)
 

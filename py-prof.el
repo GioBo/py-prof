@@ -43,7 +43,7 @@
 (require 'dash)
 (require 's)
 (require 'ctable)
-
+(require 'cl)
 (defun py-prof-split-lines-prun (line)
   "Split the LINE of the pstat table into its single elements.
 Cell that should be numeric (i.e. ncalls, tottime, percall and

@@ -55,19 +55,19 @@ cumtime) are converted to numbers."
        (string-element (replace-regexp-in-string "\\([0-9]+\\)\\s-+" "\\1|" no-space))
        (string-splitted (split-string string-element "|"))
        (elements
-	(if (> (length string-splitted) 1)
-	    (progn
-	      (list
-	       (nth 0 string-splitted)
-	       (string-to-number (nth 1 string-splitted))
-	       (string-to-number (nth 2 string-splitted))
-	       (string-to-number (nth 3 string-splitted))
-	       (string-to-number (nth 4 string-splitted))
-	       (nth 5 string-splitted)
-	       )
-	      )
-	  )
-	))
+  (if (> (length string-splitted) 1)
+      (progn
+        (list
+         (nth 0 string-splitted)
+         (string-to-number (nth 1 string-splitted))
+         (string-to-number (nth 2 string-splitted))
+         (string-to-number (nth 3 string-splitted))
+         (string-to-number (nth 4 string-splitted))
+         (nth 5 string-splitted)
+         )
+        )
+    )
+  ))
     elements
     )
   )
@@ -79,57 +79,57 @@ PY-PROF--TABLE contains the data provided by the profiler."
 
   (lexical-let*
       ((column-model ; column model
-	(list (make-ctbl:cmodel
-	       :title "ncalls" :min-width 10 :align 'right)
-	      (make-ctbl:cmodel
-	       :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
-	       :min-width 8 :align 'right)
-	      (make-ctbl:cmodel
-	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-	       :min-width 8 :align 'right)
-	      (make-ctbl:cmodel
-	       :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
-	       :min-width 8 :align 'right)
-	      (make-ctbl:cmodel
-	       :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
-	       :min-width 8 :align 'right)
-	      (make-ctbl:cmodel
-	       :title "filename:lineno(function)" :align 'left
-	       :min-width 30 :align 'right)
-	      ))
+  (list (make-ctbl:cmodel
+         :title "ncalls" :min-width 10 :align 'right)
+        (make-ctbl:cmodel
+         :title "Tottime" :align 'center :sorter 'ctbl:sort-number-lessp
+         :min-width 8 :align 'right)
+        (make-ctbl:cmodel
+         :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+         :min-width 8 :align 'right)
+        (make-ctbl:cmodel
+         :title "cumtime" :align 'center :sorter 'ctbl:sort-number-lessp
+         :min-width 8 :align 'right)
+        (make-ctbl:cmodel
+         :title "percall" :align 'center :sorter 'ctbl:sort-number-lessp
+         :min-width 8 :align 'right)
+        (make-ctbl:cmodel
+         :title "filename:lineno(function)" :align 'left
+         :min-width 30 :align 'right)
+        ))
 
        (data py-prof--table)
 
        (model ; data model
-	(make-ctbl:model
-	 :column-model column-model :data data))
+  (make-ctbl:model
+   :column-model column-model :data data))
        component)
     
     (setq component ; building a ctable component
-	  (ctbl:create-table-component-buffer
-	   :model model))
+    (ctbl:create-table-component-buffer
+     :model model))
     
     ;; Click event handler
     (ctbl:cp-add-click-hook
      component (lambda ()
-		 (let ((row  (py-prof-get-file (ctbl:cp-get-selected-data-row component))))
-		   ;;(message "CTable : Click Hook []")
-		   (if row
-		       (progn
-			 (message (plist-get row :file))
-			 (find-file (plist-get row :file))
-			 (goto-line (plist-get row :line))
- 			 )
-		     )
-		   (message "Not a file link")
-		   )
-		 )
+     (let ((row  (py-prof-get-file (ctbl:cp-get-selected-data-row component))))
+       ;;(message "CTable : Click Hook []")
+       (if row
+           (progn
+       (message (plist-get row :file))
+       (find-file (plist-get row :file))
+       (goto-line (plist-get row :line))
+       )
+         )
+       (message "Not a file link")
+       )
+     )
      ) ; update table
 
     ;; Selection change event handler
     (ctbl:cp-add-selection-change-hook
      component (lambda () (message "CTable : Select Hook %S"
-				   (ctbl:cp-get-selected component))))
+           (ctbl:cp-get-selected component))))
 
     ;; Update event handler
     (ctbl:cp-add-update-hook
@@ -159,29 +159,29 @@ last temp file."
        (temp-file-csv (make-temp-file nil nil ".csv"))
 
        (comando
-	(if (equal COMMAND "run_function")
-	    (s-replace  "\"" "'"  (read-from-minibuffer "Command to execute : " ""))
-	  (read-file-name "Enter name of the file to profile:")))
+  (if (equal COMMAND "run_function")
+      (s-replace  "\"" "'"  (read-from-minibuffer "Command to execute : " ""))
+    (read-file-name "Enter name of the file to profile:")))
        (comandi (list
-		 "import cProfile"
-		 "import pstats"
-		 (if (equal COMMAND "run_function")
-		     (format "cProfile.run(\"%s\", filename='%s')" comando temp-file)
-		   (format "cProfile.run(open('%s', 'rb'), filename='%s')" comando temp-file)
-		   )
-		 (format "f = open('%s','w')" temp-file-csv)
-		 (format "ps = pstats.Stats('%s', stream=f)" temp-file)
-		 "ps.print_stats()"
+     "import cProfile"
+     "import pstats"
+     (if (equal COMMAND "run_function")
+         (format "cProfile.run(\"%s\", filename='%s')" comando temp-file)
+       (format "cProfile.run(open('%s', 'rb'), filename='%s')" comando temp-file)
+       )
+     (format "f = open('%s','w')" temp-file-csv)
+     (format "ps = pstats.Stats('%s', stream=f)" temp-file)
+     "ps.print_stats()"
 
-		 )
-		)
+     )
+    )
        )
     (message temp-file)
     (mapcar (lambda(x)
-	      (python-shell-send-string-no-output x (python-shell-get-process-or-error))
-	      )
-	    comandi
-	    )
+        (python-shell-send-string-no-output x (python-shell-get-process-or-error))
+        )
+      comandi
+      )
     (python-shell-send-string-no-output "f.close()" (python-shell-get-process-or-error))
 
     temp-file-csv
@@ -198,13 +198,13 @@ CONTENT is the content of the clicked row of the ctable."
       ((py-prof-cell-file (nth 5 CONTENT))
        )
     (if (s-match "^[\{ \<]" py-prof-cell-file)
-	nil
+  nil
       (list :file (nth 0 (split-string py-prof-cell-file ":"))
-	    :line (string-to-number
-		   (replace-regexp-in-string ".*:\\([0-9]+\\).*" "\\1"
-					     py-prof-cell-file)
-		   )
-	    )
+      :line (string-to-number
+       (replace-regexp-in-string ".*:\\([0-9]+\\).*" "\\1"
+               py-prof-cell-file)
+       )
+      )
       )
     )
   )
@@ -220,10 +220,10 @@ CONTENT is the content of the clicked row of the ctable."
        (temp-list (s-split "\n" (f-read temp-file-csv) t))
        ;; find the beginning of the cProfile table
        (temp-header (-find-index (lambda(x) (string-match-p "ncalls\\s-+tottime" x)) temp-list))
-	;; filter out the first rows
-	(data-table (-drop (+ 1 temp-header) temp-list))
-	(data-filtered (mapcar (lambda(x) (py-prof-split-lines-prun x)) data-table))
-	)
+  ;; filter out the first rows
+  (data-table (-drop (+ 1 temp-header) temp-list))
+  (data-filtered (mapcar (lambda(x) (py-prof-split-lines-prun x)) data-table))
+  )
        (py-prof-create-table data-filtered)
        )
     )
@@ -246,9 +246,9 @@ CONTENT is the content of the clicked row of the ctable."
   "Observe cProfile output."
   :lighter "py-prof"
   :keymap (let ((map (make-sparse-keymap)))
-	    (define-key map (kbd "C-c r") 'py-prof-run)
-	    (define-key map (kbd "C-c f") 'py-prof-file)
-	    map))
+      (define-key map (kbd "C-c r") 'py-prof-run)
+      (define-key map (kbd "C-c f") 'py-prof-file)
+      map))
 
 
 (provide 'py-prof)

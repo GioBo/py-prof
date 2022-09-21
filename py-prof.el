@@ -117,7 +117,7 @@ PY-PROF--TABLE contains the data provided by the profiler."
            (progn
        (message (plist-get row :file))
        (find-file (plist-get row :file))
-       (goto-line (plist-get row :line))
+       (forward-line (plist-get row :line))
        )
          )
        (message "Not a file link")
@@ -176,7 +176,7 @@ last temp file."
     )
        )
     (message temp-file)
-    (mapcar (lambda(x)
+    (mapc (lambda(x)
         (python-shell-send-string-no-output x (python-shell-get-process-or-error))
         )
       comandi

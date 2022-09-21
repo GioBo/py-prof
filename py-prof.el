@@ -1,4 +1,4 @@
-;;; py-prof.el --- Easily observe python cProfile output
+;;; py-prof.el --- Easily observe python cProfile output  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2017 Gionata Bocci
 
@@ -43,7 +43,6 @@
 (require 'dash)
 (require 's)
 (require 'ctable)
-(require 'cl)
 (defun py-prof-split-lines-prun (line)
   "Split the LINE of the pstat table into its single elements.
 Cell that should be numeric (i.e. ncalls, tottime, percall and
@@ -77,7 +76,7 @@ cumtime) are converted to numbers."
 PY-PROF--TABLE contains the data provided by the profiler."
   (interactive)
 
-  (lexical-let*
+  (let*
       ((column-model ; column model
   (list (make-ctbl:cmodel
          :title "ncalls" :min-width 10 :align 'right)

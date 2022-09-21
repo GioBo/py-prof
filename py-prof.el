@@ -3,8 +3,8 @@
 ;; Copyright (C) 2017 Gionata Bocci
 
 ;; Author: G. Bocci <boccigionata@gmail.com>
-;; Version: 0.1
-;; Package-Requires: ((dash) (s) (ctable))
+;; Version: 0.2
+;; Package-Requires: ((dash) (s) (ctable) (f))
 ;; Keywords: python, cProfile, profiling
 ;; URL: https://github.com/GioBo/py-prof/
 
@@ -43,6 +43,8 @@
 (require 'dash)
 (require 's)
 (require 'ctable)
+(require 'f)
+(require 'python)
 (defun py-prof-split-lines-prun (line)
   "Split the LINE of the pstat table into its single elements.
 Cell that should be numeric (i.e. ncalls, tottime, percall and

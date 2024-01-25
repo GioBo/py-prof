@@ -231,13 +231,13 @@ CONTENT is the content of the clicked row of the ctable."
 
 
 (defun py-prof-run()
-  "docstring"
+  "Convenience function."
   (interactive)
   (py-prof-ex "run_function")
   )
 
 (defun py-prof-file()
-  "docstring"
+  "Convenience function."
   (interactive)
   (py-prof-ex "run_script")
   )
@@ -250,6 +250,74 @@ CONTENT is the content of the clicked row of the ctable."
 	    (define-key map (kbd "C-c r") 'py-prof-run)
 	    (define-key map (kbd "C-c f") 'py-prof-file)
 	    map))
+
+
+;; https://www.emacswiki.org/emacs/ExecuteExternalCommand
+(defun execvp (&rest args)
+  "Simulate C's execvp() function.
+Quote each argument in ARGS seperately, join with spaces and call
+'shell-command-to-string' to run in a shell."
+  (let ((cmd (mapconcat 'shell-quote-argument args " ")))
+    (shell-command-to-string cmd)
+    ;; cmd
+    )
+  )
+
+
+(defun profile-py(&optional python-script)
+  "Profile a python script.
+The function asks for the name of a PYTHON-SCRIPT which has to be profiled,
+then:
+      1. run cProfile and dump results in a temporary file
+      2. run pstats on the dump file and turn its content into
+         a csv file.
+      3. creates a table version of the csv file content using the
+         pstats-table function."
+  (interactive)
+  (let*
+      ((python-script (unless python-script
+			(expand-file-name
+			 (read-file-name "Enter name of the file to profile:"))))
+       (temp-prof (make-temp-file nil nil ".prof" python-script))
+       (temp-csv (make-temp-file nil nil ".csv"))
+       )
+    ;; (execvp "python" "-m" "cProfile" "-o" "/tmp/ioboia.dump" "o.py")
+    (execvp "python" "-m" "cProfile" "-o"
+	    (format "%s" temp-prof)
+	    (format "%s" python-script))
+    (execvp "python" "-m" "cProfile" "-o"
+	    (format "%s" temp-prof)
+	    (format "%s" python-script))
+    (sleep-for 1)
+    (execvp "python" "-c"
+	    (format "import pstats\nwith open(\"%s\", \"w\") as f: pstats.Stats(\"%s\", stream=f).print_stats()"
+		    temp-csv
+		    temp-prof))
+    (print temp-prof)
+    (print temp-csv)
+    (sleep-for 1)
+    (pstats-table temp-csv)
+    ))
+    
+(defun pstats-table(temp-file-csv)
+  "Create a table showing profiling results.
+Read the content of a cProfile dumped into TEMP-FILE-CSV and convert
+its content into a table using the ctable package."
+  (interactive)
+  (let*
+      (
+       ;; (temp-file-csv (py-prof-execute-command-cProfile CALLED))
+       (temp-list (s-split "\n" (f-read temp-file-csv) t))
+       ;; find the beginning of the cProfile table
+       (temp-header (-find-index (lambda(x) (string-match-p "ncalls\\s-+tottime" x)) temp-list))
+	;; filter out the first rows
+	(data-table (-drop (+ 1 temp-header) temp-list))
+	(data-filtered (mapcar (lambda(x) (py-prof-split-lines-prun x)) data-table))
+	)
+       (py-prof-create-table data-filtered)
+       )
+    )
+
 
 
 (provide 'py-prof)
